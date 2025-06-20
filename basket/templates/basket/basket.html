@@ -1,0 +1,76 @@
+{% extends 'main/layout.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Корзина</h2>
+    {% if basket_items %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Сумма</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in basket_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.product.price }} ₽</td>
+                <td>
+                    <form action="{% url 'basket:update_basket' item.id %}" method="post" class="update-form">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control d-inline w-auto">
+                        <button type="submit" class="btn btn-sm btn-primary">Обновить</button>
+                    </form>
+                </td>
+                <td>{{ item.product.price|floatformat:2|multiply:item.quantity }} ₽</td>
+                <td>
+                    <form action="{% url 'basket:remove_from_basket' item.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Подытог:</strong> {{ subtotal|floatformat:2 }} ₽</p>
+            <p><strong>Скидка:</strong> {{ discount|floatformat:2 }} ₽</p>
+            <p><strong>Итого:</strong> {{ total|floatformat:2 }} ₽</p>
+            <form action="{% url 'basket:create_order' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Оформить заказ</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p>Ваша корзина пуста.</p>
+    {% endif %}
+</div>
+<script>
+    document.querySelectorAll('.update-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {
+                    'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Ошибка при обновлении');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

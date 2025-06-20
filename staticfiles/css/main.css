@@ -1,0 +1,51 @@
+/* Основные стили */
+.navbar-brand img {
+    height: 40px;
+}
+
+.game-card {
+    transition: transform 0.3s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.discount-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.9rem;
+}
+
+footer {
+    background-color: #f8f9fa;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+.rating i {
+    color: gold;
+}
+
+/* Дополнительные стили */
+.filter-scroll {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #dee2e6 #f8f9fa;
+}
+
+.filter-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filter-scroll::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.filter-scroll::-webkit-scrollbar-thumb {
+    background-color: #dee2e6;
+    border-radius: 6px;
+}

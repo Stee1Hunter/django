@@ -1,0 +1,205 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}{{ game.name }} | Каталог | GameMarket{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex align-items-center">
+        <img src="{{ game.logo_url }}" alt="{{ game.name }} Logo" class="me-3" style="width: 80px; height: 80px;">
+        <div>
+            <h1 class="mb-0">{{ game.name }}</h1>
+            <p class="text-muted">Каталог предметов</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Блок фильтров -->
+    <div class="col-md-3 mb-4">
+        <form id="filter-form" method="get">
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-funnel"></i> Фильтры</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-tags"></i> Категории</h6>
+                    <div class="filter-scroll" style="max-height: 200px; overflow-y: auto;">
+                        {% for category in categories %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"
+                                   name="category" value="{{ category.id }}"
+                                   id="category{{ category.id }}"
+                                   {% if category.id in selected_categories %}checked{% endif %}>
+                            <label class="form-check-label" for="category{{ category.id }}">
+                                {{ category.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <hr>
+
+                    <h6 class="fw-bold mb-3"><i class="bi bi-currency-exchange"></i> Цена</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col">
+                            <input type="number" class="form-control"
+                                   name="min_price" placeholder="От"
+                                   value="{{ min_price|default:'' }}">
+                        </div>
+                        <div class="col">
+                            <input type="number" class="form-control"
+                                   name="max_price" placeholder="До"
+                                   value="{{ max_price|default:'' }}">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Применить
+                        </button>
+                        {% if selected_categories or min_price or max_price %}
+                        <a href="?sort={{ current_sort }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Сбросить
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="col-md-9">
+        <form method="GET" class="mb-2 d-flex justify-content-between align-items-end">
+            <div>
+                <label for="sort" class="form-label">Сортировать по</label>
+                <select class="form-select" name="sort" id="sort" onchange="this.form.submit()">
+                    <option value="">Без сортировки</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Цене ↑</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Цене ↓</option>
+                </select>
+            </div>
+        </form>
+
+        <!-- Список товаров -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for product in products %}
+            <div class="col">
+                <div class="card h-100 game-card">
+                    {% if product.discount %}
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">-{{ product.discount }}%</span>
+                    {% endif %}
+                    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 180px; object-fit: contain;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <div class="d-flex align-items-center mb-2">
+                            <p class="text-success fw-bold mb-0">{{ product.price }} ₽</p>
+                            {% if product.old_price %}
+                            <small class="text-muted text-decoration-line-through ms-2">{{ product.old_price }} ₽</small>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'product' product.id %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-eye"></i> Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center py-4">
+                    <i class="bi bi-exclamation-circle fs-4"></i>
+                    <h5 class="mt-2">Товары не найдены</h5>
+                    <p class="mb-0">Попробуйте изменить параметры фильтрации</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if products.paginator.num_pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if products.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?{% if selected_categories %}{% for c in selected_categories %}category={{ c }}&{% endfor %}{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if current_sort and current_sort != 'default' %}sort={{ current_sort }}&{% endif %}page={{ products.previous_page_number }}">
+                        <i class="bi bi-chevron-left"></i> Назад
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">
+                        <i class="bi bi-chevron-left"></i> Назад
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for i in products.paginator.page_range %}
+                {% if products.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?{% if selected_categories %}{% for c in selected_categories %}category={{ c }}&{% endfor %}{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if current_sort and current_sort != 'default' %}sort={{ current_sort }}&{% endif %}page={{ i }}">
+                        {{ i }}
+                    </a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if products.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?{% if selected_categories %}{% for c in selected_categories %}category={{ c }}&{% endfor %}{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if current_sort and current_sort != 'default' %}sort={{ current_sort }}&{% endif %}page={{ products.next_page_number }}">
+                        Вперед <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">
+                        Вперед <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Автоматическая отправка формы при изменении чекбоксов
+    const checkboxes = document.querySelectorAll('#filter-form input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+
+<style>
+    .filter-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #dee2e6 #f8f9fa;
+    }
+    .filter-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+    .filter-scroll::-webkit-scrollbar-track {
+        background: #f8f9fa;
+    }
+    .filter-scroll::-webkit-scrollbar-thumb {
+        background-color: #dee2e6;
+        border-radius: 6px;
+    }
+    .game-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}

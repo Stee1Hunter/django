@@ -1,0 +1,138 @@
+{% extends 'main/layout.html' %}
+{% block title %}Корзина | GameMarket{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Ваша корзина</h2>
+
+            {% if basket_items %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Товар</th>
+                                <th>Цена</th>
+                                <th>Количество</th>
+                                <th>Сумма</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in basket_items %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'product' item.product.id %}">
+                                        {{ item.product.name }}
+                                    </a>
+                                </td>
+                                <td>{{ item.product.price }} руб.</td>
+                                <td>
+                                    <input type="number"
+                                           class="form-control quantity-input"
+                                           value="{{ item.quantity }}"
+                                           min="1"
+                                           data-item-id="{{ item.id }}"
+                                           style="width: 70px;">
+                                </td>
+                                <td> руб.</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm remove-item"
+                                            data-item-id="{{ item.id }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Итого:</th>
+                                <th colspan="2">{{ total }} руб.</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'index' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Продолжить покупки
+                    </a>
+
+                    <form action="{% url 'create_order' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            Оформить заказ <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+
+            {% else %}
+                <div class="alert alert-info">
+                    Ваша корзина пуста
+                </div>
+                <a href="{% url 'index' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Вернуться к покупкам
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = document.querySelector('[name=csrfmiddlewareexrecs]') ?
+        document.querySelector('[name=csrfmiddlewareexrecs]').value :
+        '{% csrf_token %}'.match(/value="(.*?)"/)?.[1];
+
+    // Обработчик изменения количества товара
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function () {
+            const itemId = this.dataset.itemId;
+            const quantity = this.value;
+
+            fetch(`/update-basket/${itemId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'quantity': quantity
+                }).toString()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
+    });
+
+    // Обработчик удаления товара из корзины
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function () {
+            const itemId = this.dataset.itemId;
+
+            fetch(`/remove-from-basket/${itemId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

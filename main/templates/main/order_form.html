@@ -1,0 +1,104 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h2 class="h5 mb-0">{{ title|default:"Оформление заказа" }}</h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Пользователь и контактные данные -->
+                        <div class="mb-4">
+                            <h3 class="h6 mb-3 text-muted">Контактная информация</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.user.id_for_label }}" class="form-label">Пользователь *</label>
+                                    {{ form.user }}
+                                    <div class="invalid-feedback">
+                                        Пожалуйста, выберите пользователя
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email"
+                                           value="{{ form.instance.user.email|default:'' }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Информация о заказе -->
+                        <div class="mb-4">
+                            <h3 class="h6 mb-3 text-muted">Детали заказа</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.total_price.id_for_label }}" class="form-label">Сумма заказа *</label>
+                                    <div class="input-group">
+                                        {{ form.total_price }}
+                                        <span class="input-group-text">₽</span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Введите корректную сумму
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label">Статус *</label>
+                                    {{ form.status }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Список товаров (динамическое поле) -->
+                        <div class="mb-4">
+                            <h3 class="h6 mb-3 text-muted">Состав заказа</h3>
+                            <div id="order-items" class="mb-3">
+                                {% for item in order.orderitem_set.all %}
+                                <div class="card mb-2">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                                            <strong>{{ item.get_total }} ₽</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <a href="#" class="btn btn-sm btn-outline-primary" id="add-item-btn">
+                                <i class="bi bi-plus"></i> Добавить товар
+                            </a>
+                        </div>
+
+                        <!-- Кнопки действий -->
+                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <a href="{% url 'order_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check2"></i> Сохранить заказ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Динамическое добавление товаров в заказ
+document.addEventListener('DOMContentLoaded', function() {
+    const addItemBtn = document.getElementById('add-item-btn');
+    const orderItemsContainer = document.getElementById('order-items');
+
+    addItemBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Здесь должна быть логика добавления товара через модальное окно или AJAX
+        console.log('Добавление товара в заказ');
+    });
+});
+</script>
+{% endblock %}

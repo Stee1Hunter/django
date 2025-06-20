@@ -1,0 +1,51 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}О нас | GameMarket{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <h1 class="display-4">О компании GameMarket</h1>
+        <p class="lead">Наша миссия - сделать покупку игровых предметов простой и безопасной</p>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6">
+        <h2><i class="bi bi-info-circle"></i> Кто мы?</h2>
+        <p>GameMarket - это ведущая платформа для покупки и продажи игровых предметов. Мы работаем с 2015 года и помогли более чем 1 миллиону игроков улучшить свой игровой опыт.</p>
+        <p>Наша команда состоит из опытных геймеров и разработчиков, которые понимают потребности игрового сообщества.</p>
+    </div>
+    <div class="col-md-6">
+        <img src="https://avatars.mds.yandex.net/i?id=7db0c793e7811770d34d4f8f9816d7ca-4256054-images-thumbs&n=13" alt="Наша команда" class="img-fluid rounded">
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6 order-md-2">
+        <h2><i class="bi bi-shield-check"></i> Наши принципы</h2>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i> 100% безопасность сделок</li>
+            <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i> Лучшие цены на рынке</li>
+            <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i> Мгновенная доставка</li>
+            <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i> Круглосуточная поддержка</li>
+            <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i> Гарантия возврата средств</li>
+        </ul>
+    </div>
+    <div class="col-md-6 order-md-1">
+        <img src="https://www.simplilearn.com/ice9/free_resources_article_thumb/project-management-basic-principles-article.jpg" alt="Наши принципы" class="img-fluid rounded">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h3 class="card-title">Присоединяйтесь к нам!</h3>
+                <p class="card-text">Более 500,000 довольных клиентов по всему миру</p>
+                <a href="{% url 'index' %}" class="btn btn-primary btn-lg">Начать покупки</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

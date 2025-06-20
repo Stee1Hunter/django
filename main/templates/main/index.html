@@ -1,0 +1,44 @@
+{% extends 'main/layout.html' %}
+
+{% block title %}Главная страница | GameMarket{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-4">Лучшие предложения</h1>
+        <p class="lead">Скидки на популярные игровые предметы</p>
+    </div>
+</div>
+
+{% for game in games_with_discounts %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-joystick"></i> {{ game.name }}</h2>
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in game.products %}
+            <div class="col">
+                <div class="card h-100 game-card position-relative">
+                    {% if product.discount %}
+                    <span class="discount-badge bg-danger text-white p-2 rounded">-{{ product.discount }}%</span>
+                    {% endif %}
+                    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">
+                            {% if product.discount %}
+                            <span class="text-decoration-line-through text-muted me-2">{{ product.old_price }} ₽</span>
+                            {% endif %}
+                            <span class="fw-bold {% if product.discount %}text-danger{% else %}text-success{% endif %}">
+                                {{ product.price }} ₽
+                            </span>
+                        </p>
+                        <a href="{% url 'product' product.id %}" class="btn btn-primary w-100">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
